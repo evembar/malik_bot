@@ -2,7 +2,7 @@ from aiogram import Bot, Dispatcher, executor, types
 import time
 from aiogram.types import BotCommand
 
-API_TOKEN = '**your_API***'
+API_TOKEN = '6854441550:AAHVSTPHzRYOXOBtfC2-VRH3ScIvncbMxNI'
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
@@ -195,21 +195,6 @@ async def setup_default_commands(dp):
         BotCommand(command="sticker", description="Проверка доступных к отправке стикеров")
     ])
 
-@dp.message_handler(content_types=['any'])
-async def startup_message(message: types.Message):
-   global continuer
-   if continuer == 1:
-      await message.answer('Продолжай.')
-      time_set = time.time()
-      local_time = time.ctime(time_set)
-      log = open('log.txt', 'a')
-      user_sticker = message.from_user.first_name
-      log.write(f'\n {local_time}: Пользователь {user_sticker} Предложил мне.')
-      log.close()
-      print(f'\n {local_time}: Пользователь {user_sticker} Предложил мне.')
-   else:
-      pass
-
 @dp.message_handler(content_types=['any']) #Создаём новое событие, которое запускается в ответ на любой текст, введённый пользователем.
 async def echo(message: types.Message): #Создаём функцию с простой задачей — отправить обратно тот же текст, что ввёл пользователь.
    global stickerblock, maxstickerblock, blockedstickerblock
@@ -238,6 +223,19 @@ async def echo(message: types.Message): #Создаём функцию с про
          time.sleep(2)
          await sticker_msg.delete()
          await sigmanotsticker.delete()
+   else:
+      global continuer
+      if continuer == 1:
+         await message.answer('Продолжай.')
+         time_set = time.time()
+         local_time = time.ctime(time_set)
+         log = open('log.txt', 'a')
+         user_sticker = message.from_user.first_name
+         log.write(f'\n {local_time}: Пользователь {user_sticker} Предложил мне.')
+         log.close()
+         print(f'\n {local_time}: Пользователь {user_sticker} Предложил мне.')
+      else:
+         pass
 
 if __name__ == '__main__':
    
