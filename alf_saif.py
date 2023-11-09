@@ -2,7 +2,7 @@ from aiogram import Bot, Dispatcher, executor, types
 import time
 from aiogram.types import BotCommand
 
-API_TOKEN = '6854441550:AAHVSTPHzRYOXOBtfC2-VRH3ScIvncbMxNI'
+API_TOKEN = '**your_API***'
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
