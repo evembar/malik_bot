@@ -28,7 +28,7 @@ blockedvideoblock = 0
 
 @dp.message_handler(commands=['about'], content_types=['any'])
 async def startup_message(message: types.Message):
-   info_msg = await message.answer('Малик Альф Саиф. Версия 0.03. Made by WebMast from WebAnLiMaks studio, hosted by Nikita44')
+   info_msg = await message.answer('Малик Альф Саиф. Версия 0.3. Made by WebMast from WebAnLiMaks studio, hosted by Nikita44')
    video_msg = await message.answer_photo(r'https://github.com/evembar/malik_bot/raw/main/startup.webp')
    time_set = time.time()
    local_time = time.ctime(time_set)
@@ -406,5 +406,5 @@ async def echo(message: types.Message): #Создаём функцию с про
 
 if __name__ == '__main__':
    
-   print('Запуск Malik Alf-Salif 0.2')
+   print('Запуск Malik Alf-Salif 0.3')
    executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
