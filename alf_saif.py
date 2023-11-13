@@ -225,7 +225,29 @@ class Form(StatesGroup):
    id_admin2 = State()
    id_admin3  = State()
    
+@dp.message_handler(commands=['view_log'], content_types=['any'])
+async def startup_message(message: types.Message):
+      
+   if message.chat.type == 'private':
+      view_log = open('log.txt', 'r')
+      log_msg=view_log.read()
+      view_log.close()
+      if len(log_msg) > 4096:
+         for x in range(0, len(log_msg), 4096):
+            await bot.send_message(message.chat.id, log_msg[x:x+4096])
 
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} Посмотрел логи')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} Посмотрел логи')
+   else:
+      setup_admin_msg = await message.answer('Данная команда выполняется в личном чате с ботом.')
+      await asyncio.sleep(3)
+      await setup_admin_msg.delete()
+      await message.delete()
 
 @dp.message_handler(commands=['setup'], content_types=['any'])
 async def startup_message(message: types.Message):
@@ -243,6 +265,7 @@ async def startup_message(message: types.Message):
          setup_admin_msg = await message.answer('Данная команда выполняется в личном чате с ботом.')
          await asyncio.sleep(3)
          await setup_admin_msg.delete()
+         await message.delete()
 
 
    else:
@@ -550,12 +573,13 @@ async def setup_default_commands(dp):
         BotCommand(command="about", description="О Малике"),
         BotCommand(command="cont_mod", description="Включение функции продолжайкина"),
         BotCommand(command="start", description="Приветствие от Малика"),
-        BotCommand(command="obnull_limit_all", description="Обнуление лимита отправляемых медиа"),
+        BotCommand(command="obnull_limit_all", description="Обнуление лимита отправляемых гифок и стикеров"),
         BotCommand(command="clear_log", description="Очистка логов"),
         BotCommand(command="sticker", description="Проверка доступных к отправке стикеров"),
         BotCommand(command="gif", description="Проверка доступных к отправке гифок"),
         BotCommand(command="setup", description="Настроить Малика делать то, от чего вам нужно"),
         BotCommand(command="view_config", description="Посмотреть конфигурацию у конфигуратора"),
+        BotCommand(command="view_log", description="Посмотреть все логи"),
     ])
     asyncio.create_task(scheduler())
       
@@ -677,7 +701,7 @@ async def echo(message: types.Message): #Создаём функцию с про
 
                      random_ban_time = int(random.randint(900,3600))
 
-                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении {random_ban_time} минут')
+                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении {random_ban_time/60} минут')
                      ban_time= (int(time.time()) + random_ban_time*utc+random_ban_time)
                      print(ban_time)
 
