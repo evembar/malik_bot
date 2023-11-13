@@ -11,6 +11,7 @@ import asyncio
 import aioschedule
 from datetime import datetime
 import os
+import random
 
 if os.path.isfile('session.py'):
    try:
@@ -45,6 +46,10 @@ try:
    stop_spam_sticker = 'CAACAgQAAxkBAAEB67RlT7UCv46lCb1QULxPKEZp6FxKDgAC2AwAApzYQFLmTLCt5d5_tDME'
    spam_sticker_seconds = 0
 
+   admin1=ses.admin1
+   admin2=ses.admin2
+   admin3=ses.admin3
+
 
    user_track_spam_gif = ''
    new_message_time_gif = 0.0
@@ -58,7 +63,7 @@ except:
 
    utc = 4
 
-   hoster = 'WebMast'
+   hoster = 'noname-hoster'
 
    gifblock = 0
    maxgifblock = 25
@@ -70,6 +75,10 @@ except:
    stop_spam_sticker = 'CAACAgQAAxkBAAEB67RlT7UCv46lCb1QULxPKEZp6FxKDgAC2AwAApzYQFLmTLCt5d5_tDME'
    spam_sticker_seconds = 0
 
+   admin1=int(input('Укажите ID первого для начального администрирования> '))
+   admin2=int(input('Укажите ID второго админа для начального администрирования> '))
+   admin3=int(input('Укажите ID третьего админа для начального администрирования> '))
+
 
    user_track_spam_gif = ''
    new_message_time_gif = 0.0
@@ -78,7 +87,7 @@ except:
 
 @dp.message_handler(commands=['about'], content_types=['any'])
 async def startup_message(message: types.Message):
-   info_msg = await message.answer(f'Малик Альф Саиф. Версия 0.05. Made by WebMast from WebAnLiMaks studio, hosted by {hoster}.')
+   info_msg = await message.answer(f'Малик Альф Саиф. Версия 0.06. Made by WebMast from WebAnLiMaks studio, hosted by {hoster}.')
    video_msg = await message.answer_photo(r'https://github.com/evembar/malik_bot/raw/main/startup.webp')
    time_set = time.time()
    local_time = time.ctime(time_set)
@@ -127,11 +136,11 @@ async def startup_message(message: types.Message):
    
 @dp.message_handler(commands=['clear_log'], content_types=['any'])
 async def startup_message(message: types.Message):
-   webmast_id = 1702139456
-   nikita44_id=2023745296
-   ivanban_id=5507903625
+   #webmast_id = 1702139456 
+   #nikita44_id=2023745296
+   #ivanban_id=5507903625
 
-   if message.from_user.id == webmast_id or message.from_user.id == nikita44_id or message.from_user.id == ivanban_id:
+   if message.from_user.id == admin1 or message.from_user.id == admin2 or message.from_user.id == admin3:
       import os
       os.remove('log.txt')
       log = open('log.txt', 'w+')
@@ -167,11 +176,8 @@ async def startup_message(message: types.Message):
 
 @dp.message_handler(commands=['obnull_limit_all'], content_types=['any'])
 async def startup_message(message: types.Message):
-   webmast_id = 1702139456
-   nikita44_id=2023745296
-   ivanban_id=5507903625
 
-   if message.from_user.id == webmast_id or message.from_user.id == nikita44_id or message.from_user.id == ivanban_id:
+   if message.from_user.id == admin1 or message.from_user.id == admin2 or message.from_user.id == admin3:
       global stickerblock, blockedstickerblock, photoblock, blockedphotoblock, gifblock, blockedgifblock
 
       stickerblock = 0
@@ -214,17 +220,17 @@ class Form(StatesGroup):
    hoster_name = State()
    utc_number = State()
    max_sticker = State() 
-   max_gif = State() 
+   max_gif = State()
+   id_admin1 = State()
+   id_admin2 = State()
+   id_admin3  = State()
    
 
 
 @dp.message_handler(commands=['setup'], content_types=['any'])
 async def startup_message(message: types.Message):
-   webmast_id = 1702139456
-   nikita44_id=2023745296
-   ivanban_id=5507903625
 
-   if message.from_user.id == webmast_id or message.from_user.id == nikita44_id or message.from_user.id == ivanban_id:
+   if message.from_user.id == admin1 or message.from_user.id == admin2 or message.from_user.id == admin3:
       
       if message.chat.type == 'private':
          await message.answer('Конфигурация лаунчера. Сейчас будут задаваться вопросы, а вы должны ответить. Это нужно для того, чтобы создать файл для автоконфигурации лаунчера. Если не захотите отвечать, то вы можете активировать комманду /cancel')
@@ -303,7 +309,44 @@ async def process_age_invalid(message: types.Message):
 @dp.message_handler(state=Form.max_gif)
 async def process_name(message: types.Message, state: FSMContext):
     async with state.proxy() as ses_config:
-      ses_config['max_gif'] = message.text
+        ses_config['max_gif'] = message.text
+
+    await Form.next()
+    await message.reply("Укажите ID первого админа для администрирования?")
+
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.id_admin1)
+async def process_age_invalid(message: types.Message):
+    return await message.reply("Укажите ID первого админа для администрирования?!")
+
+@dp.message_handler(state=Form.id_admin1)
+async def process_name(message: types.Message, state: FSMContext):
+    async with state.proxy() as ses_config:
+        ses_config['id_admin1'] = message.text
+
+    await Form.next()
+    await message.reply("Укажите ID второго админа для администрирования?")
+
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.id_admin2)
+async def process_age_invalid(message: types.Message):
+    return await message.reply("Укажите ID второго админа для администрирования?!")
+
+@dp.message_handler(state=Form.id_admin2)
+async def process_name(message: types.Message, state: FSMContext):
+    async with state.proxy() as ses_config:
+        ses_config['id_admin2'] = message.text
+
+    await Form.next()
+    await message.reply("Укажите ID третьего админа для администрирования?")
+
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.id_admin3)
+async def process_age_invalid(message: types.Message):
+    return await message.reply("Укажите ID третьего админа для администрирования?!")
+
+@dp.message_handler(state=Form.id_admin3)
+async def process_name(message: types.Message, state: FSMContext):
+    global hoster, utc, maxstickerblock, maxgifblock, stickerblock, gifblock
+    async with state.proxy() as ses_config:
+      ses_config['id_admin3'] = message.text
       markup = types.ReplyKeyboardRemove()
 
 
@@ -317,6 +360,9 @@ async def process_name(message: types.Message, state: FSMContext):
                   md.text('Часовой пояс: ', ses_config['utc_number']),
                   md.text('Максимальное количество стикеров: ', ses_config['max_sticker']),
                   md.text('Максимальное количество гифок: ', ses_config['max_gif']),
+                  md.text('ID превого администратора: ', ses_config['id_admin1']),
+                  md.text('ID второго администратора: ', ses_config['id_admin2']),
+                  md.text('ID третьего администратора: ', ses_config['id_admin3']),
                   sep='\n',
                ),
                parse_mode=ParseMode.MARKDOWN,
@@ -336,6 +382,13 @@ async def process_name(message: types.Message, state: FSMContext):
          f.write(f'maxstickerblock=int({ses_config["max_sticker"]})')
          f.write('\n')
          f.write(f'maxgifblock=int({ses_config["max_gif"]})')
+         f.write('\n')
+         f.write(f'admin1=int({ses_config["id_admin1"]})')
+         f.write('\n')
+         f.write(f'admin2=int({ses_config["id_admin2"]})')
+         f.write('\n')
+         f.write(f'admin3=int({ses_config["id_admin3"]})')
+         f.write('\n')
     else:
       with open ('session.py', 'w') as f:
          f.write('\n')
@@ -348,6 +401,20 @@ async def process_name(message: types.Message, state: FSMContext):
          f.write(f'maxstickerblock=int({ses_config["max_sticker"]})')
          f.write('\n')
          f.write(f'maxgifblock=int({ses_config["max_gif"]})')
+         f.write('\n')
+         f.write(f'admin1=int({ses_config["id_admin1"]})')
+         f.write('\n')
+         f.write(f'admin2=int({ses_config["id_admin2"]})')
+         f.write('\n')
+         f.write(f'admin3=int({ses_config["id_admin3"]})')
+         f.write('\n')
+
+    stickerblock=0
+    gifblock=0
+    maxstickerblock=ses_config['max_sticker']
+    maxgifblock=ses_config['max_gif']
+    utc=ses_config['utc_number']
+    hoster=ses_config['hoster_name']
 
 @dp.message_handler(commands=['view_config']) #Явно указываем в декораторе, на какую команду реагируем. 
 async def send_welcome(message: types.Message):
@@ -362,6 +429,9 @@ async def send_welcome(message: types.Message):
                md.text('Часовой пояс: ', utc),
                md.text('Максимальное количество стикеров: ', maxstickerblock),
                md.text('Максимальное количество гифок: ', maxgifblock),
+               md.text('ID превого администратора: ', admin1),
+               md.text('ID второго администратора: ', admin2),
+               md.text('ID третьего администратора: ', admin3),
                sep='\n',
             ),
             parse_mode=ParseMode.MARKDOWN,
@@ -384,11 +454,8 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(commands=['cont_mod'], content_types=['any'])
 async def startup_message(message: types.Message):
-   webmast_id = 1702139456
-   nikita44_id=2023745296
-   ivanban_id=5507903625
 
-   if message.from_user.id == webmast_id or message.from_user.id == nikita44_id or message.from_user.id == ivanban_id:
+   if message.from_user.id == admin1 or message.from_user.id == admin2 or message.from_user.id == admin3:
       global continuer
 
       if continuer == 0:
@@ -512,7 +579,7 @@ async def echo(message: types.Message): #Создаём функцию с про
 
          timemsg = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, datetime.now().microsecond)
 
-         if user_track_spam_gif == '':
+         if user_track_spam == '':
             user_track_spam = message.from_user.first_name
             print(user_track_spam)
             new_message_time == timemsg.microsecond
@@ -536,9 +603,12 @@ async def echo(message: types.Message): #Создаём функцию с про
                      print("Медленный стикер")
 
                   if spam_sticker_seconds == 1:
-                     #antispam_message_sticker = await message.answer_sticker(stop_spam_sticker)
-                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении 15 минут')
-                     ban_time= (int(time.time()) + 900*utc+900)
+                     #antispam_message_sticker = await message.answer_sticker(stop_spam_sticker)\
+
+                     random_ban_time = int(random.randint(900,3600))
+
+                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении {int(random_ban_time/60)} минут')
+                     ban_time= (int(time.time()) + random_ban_time*random_ban_time+900)
                      print(ban_time)
 
                      await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_messages=False)
@@ -604,8 +674,11 @@ async def echo(message: types.Message): #Создаём функцию с про
 
                   if spam_gif_seconds == 1:
                      #antispam_message_sticker = await message.answer_sticker(stop_spam_sticker)
-                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении 15 минут')
-                     ban_time= (int(time.time()) + 900*utc+900)
+
+                     random_ban_time = int(random.randint(900,3600))
+
+                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении {random_ban_time} минут')
+                     ban_time= (int(time.time()) + random_ban_time*utc+random_ban_time)
                      print(ban_time)
 
                      await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_messages=False)
@@ -647,8 +720,9 @@ async def echo(message: types.Message): #Создаём функцию с про
 
 if __name__ == '__main__':
    
-   print('Запуск Malik Alf-Salif 0.05')
+   print('Запуск Malik Alf-Salif 0.06')
    try:
       executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
    except:
       API_TOKEN = input('Укажите API токен еще раз. После второго раза, скрипт закроется \n API TOKEN> ')
+      executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
