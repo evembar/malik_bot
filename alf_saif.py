@@ -1,40 +1,84 @@
 from aiogram import Bot, Dispatcher, executor, types
 import time
 from aiogram.types import BotCommand
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher import FSMContext
+from aiogram.types import ParseMode
+import aiogram.utils.markdown as md
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import asyncio
 import aioschedule
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
+import os
 
-API_TOKEN = '***************YOUR_API***************'
-
+if os.path.isfile('session.py'):
+   try:
+      import session as ses
+      API_TOKEN = ses.API_TOKEN
+   except:
+      API_TOKEN = input('Укажите API токен бота> ')
+else:
+   API_TOKEN = input('Укажите API токен бота> ')
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+storage = MemoryStorage()
+dp = Dispatcher(bot=bot, storage=storage)
 
-stickerblock = 0
-maxstickerblock = 25
-blockedstickerblock = 0
-continuer = 0
+try:
+   stickerblock = 0
+   maxstickerblock = ses.maxstickerblock
+   blockedstickerblock = 0
+   continuer = 0
+
+   utc = ses.utc
+
+   hoster = ses.hoster
+
+   gifblock = 0
+   maxgifblock = ses.maxgifblock
+   blockedgifblock = 0
+
+   user_track_spam = ''
+   new_message_time = 0.0
+   old_message_time = 0.0
+   stop_spam_sticker = 'CAACAgQAAxkBAAEB67RlT7UCv46lCb1QULxPKEZp6FxKDgAC2AwAApzYQFLmTLCt5d5_tDME'
+   spam_sticker_seconds = 0
 
 
-#your utc region
-utc = 1
+   user_track_spam_gif = ''
+   new_message_time_gif = 0.0
+   old_message_time_gif = 0.0
+   spam_gif_seconds = 0
+except:
+   stickerblock = 0
+   maxstickerblock = 25
+   blockedstickerblock = 0
+   continuer = 0
 
-hoster = 'WebMast'
+   utc = 4
 
-gifblock = 0
-maxgifblock = 25
-blockedgifblock = 0
+   hoster = 'WebMast'
 
-user_track_spam = ''
-new_message_time = 0.0
-old_message_time = 0.0
-stop_spam_sticker = 'CAACAgQAAxkBAAEB67RlT7UCv46lCb1QULxPKEZp6FxKDgAC2AwAApzYQFLmTLCt5d5_tDME'
-spam_sticker_seconds = 0
+   gifblock = 0
+   maxgifblock = 25
+   blockedgifblock = 0
+
+   user_track_spam = ''
+   new_message_time = 0.0
+   old_message_time = 0.0
+   stop_spam_sticker = 'CAACAgQAAxkBAAEB67RlT7UCv46lCb1QULxPKEZp6FxKDgAC2AwAApzYQFLmTLCt5d5_tDME'
+   spam_sticker_seconds = 0
+
+
+   user_track_spam_gif = ''
+   new_message_time_gif = 0.0
+   old_message_time_gif = 0.0
+   spam_gif_seconds = 0
 
 @dp.message_handler(commands=['about'], content_types=['any'])
 async def startup_message(message: types.Message):
-   info_msg = await message.answer(f'Малик Альф Саиф. Версия 0.04. Made by WebMast from WebAnLiMaks studio, hosted by {hoster}')
+   info_msg = await message.answer(f'Малик Альф Саиф. Версия 0.05. Made by WebMast from WebAnLiMaks studio, hosted by {hoster}.')
    video_msg = await message.answer_photo(r'https://github.com/evembar/malik_bot/raw/main/startup.webp')
    time_set = time.time()
    local_time = time.ctime(time_set)
@@ -43,7 +87,7 @@ async def startup_message(message: types.Message):
    log.write(f'\n {local_time}: Пользователь {user_sticker} Вызвал версию бота')
    log.close()
    print(f'\n {local_time}: Пользователь {user_sticker} Вызвал версию бота')
-   time.sleep(15)
+   time.sleep(5)
    await info_msg.delete()
    await video_msg.delete()
    await message.delete()
@@ -66,9 +110,12 @@ async def startup_message(message: types.Message):
 @dp.message_handler(commands=['gif'], content_types=['any'])
 async def startup_message(message: types.Message):
    global gifblock, maxgifblock, blockedgifblock
-   static = await message.answer(f'{local_time} : Доступных гифок осталось:  {maxgifblock - gifblock}. Заблокированных : {blockedgifblock}')
+
    time_set = time.time()
    local_time = time.ctime(time_set)
+
+   static = await message.answer(f'{local_time} : Доступных гифок осталось:  {maxgifblock - gifblock}. Заблокированных : {blockedgifblock}')
+   
    log = open('log.txt', 'a')
    user_sticker = message.from_user.first_name
    await message.delete()
@@ -163,6 +210,177 @@ async def startup_message(message: types.Message):
       time.sleep(5)
       await clear_log_info.delete()
 
+class Form(StatesGroup):
+   hoster_name = State()
+   utc_number = State()
+   max_sticker = State() 
+   max_gif = State() 
+   
+
+
+@dp.message_handler(commands=['setup'], content_types=['any'])
+async def startup_message(message: types.Message):
+   webmast_id = 1702139456
+   nikita44_id=2023745296
+   ivanban_id=5507903625
+
+   if message.from_user.id == webmast_id or message.from_user.id == nikita44_id or message.from_user.id == ivanban_id:
+      
+      if message.chat.type == 'private':
+         await message.answer('Конфигурация лаунчера. Сейчас будут задаваться вопросы, а вы должны ответить. Это нужно для того, чтобы создать файл для автоконфигурации лаунчера. Если не захотите отвечать, то вы можете активировать комманду /cancel')
+         
+         await Form.hoster_name.set()
+         await message.reply("Скажите имя или псевдоним того, кто хостит этого бота?")
+
+
+      else:
+         setup_admin_msg = await message.answer('Данная команда выполняется в личном чате с ботом.')
+         await asyncio.sleep(3)
+         await setup_admin_msg.delete()
+
+
+   else:
+
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} Попытался Изменить функцию "продолжать.')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} Попытался Изменить функцию "продолжать.')
+
+      clear_log_info = await message.answer('Доступ ограничен. Попросите об этом админов')
+      await message.delete()
+      time.sleep(5)
+      await clear_log_info.delete()
+
+@dp.message_handler(state='*', commands='cancel')
+@dp.message_handler(Text(equals='отмена', ignore_case=True), state='*')
+async def cancel_handler(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+        return
+
+    await state.finish()
+    await message.reply('Отмена настройки конфигурации')
+
+@dp.message_handler(state=Form.hoster_name)
+async def process_name(message: types.Message, state: FSMContext):
+    async with state.proxy() as ses_config:
+        ses_config['hoster_name'] = message.text
+
+    await Form.next()
+    await message.reply("Напишите часовой пояс(UTC)?")
+
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.utc_number)
+async def process_age_invalid(message: types.Message):
+    return await message.reply("Напишите пожалуйста часовой пояс?!")
+
+@dp.message_handler(state=Form.utc_number)
+async def process_name(message: types.Message, state: FSMContext):
+    async with state.proxy() as ses_config:
+        ses_config['utc_number'] = message.text
+
+    await Form.next()
+    await message.reply("Напишите максимальное количество отправляемых стикеров?")
+
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.max_sticker)
+async def process_age_invalid(message: types.Message):
+    return await message.reply("Напишите пожалуйста количество отправляемых стикеров?!")
+
+@dp.message_handler(state=Form.max_sticker)
+async def process_name(message: types.Message, state: FSMContext):
+    async with state.proxy() as ses_config:
+        ses_config['max_sticker'] = message.text
+
+    await Form.next()
+    await message.reply("Напишите максимальное количество отправляемых гифок?")
+
+@dp.message_handler(lambda message: not message.text.isdigit(), state=Form.max_gif)
+async def process_age_invalid(message: types.Message):
+    return await message.reply("Напишите количество отправляемых гифок?!")
+
+@dp.message_handler(state=Form.max_gif)
+async def process_name(message: types.Message, state: FSMContext):
+    async with state.proxy() as ses_config:
+      ses_config['max_gif'] = message.text
+      markup = types.ReplyKeyboardRemove()
+
+
+      await bot.send_message(message.chat.id, 'в конфигурации будет:')
+
+      await bot.send_message(
+               message.chat.id,
+               md.text(
+                  md.text('API токен бота: ', md.code(API_TOKEN)),
+                  md.text('Имя хостера: ', md.bold(ses_config['hoster_name'])),
+                  md.text('Часовой пояс: ', ses_config['utc_number']),
+                  md.text('Максимальное количество стикеров: ', ses_config['max_sticker']),
+                  md.text('Максимальное количество гифок: ', ses_config['max_gif']),
+                  sep='\n',
+               ),
+               parse_mode=ParseMode.MARKDOWN,
+         )
+    await state.finish()
+    
+    if os.path.isfile('session.py'):
+      os.remove('session.py')
+      with open ('session.py', 'w') as f:
+         f.write('\n')
+         f.write(f'API_TOKEN="{API_TOKEN}"')
+         f.write('\n')
+         f.write(f'hoster="{ses_config["hoster_name"]}"')
+         f.write('\n')
+         f.write(f'utc="{ses_config["utc_number"]}"')
+         f.write('\n')
+         f.write(f'maxstickerblock="{ses_config["max_sticker"]}"')
+         f.write('\n')
+         f.write(f'maxgifblock="{ses_config["max_gif"]}"')
+    else:
+      with open ('session.py', 'w') as f:
+         f.write('\n')
+         f.write(f'API_TOKEN="{API_TOKEN}"')
+         f.write('\n')
+         f.write(f'hoster="{ses_config["hoster_name"]}"')
+         f.write('\n')
+         f.write(f'utc="{ses_config["utc_number"]}"')
+         f.write('\n')
+         f.write(f'maxstickerblock="{ses_config["max_sticker"]}"')
+         f.write('\n')
+         f.write(f'maxgifblock="{ses_config["max_gif"]}"')
+
+@dp.message_handler(commands=['view_config']) #Явно указываем в декораторе, на какую команду реагируем. 
+async def send_welcome(message: types.Message):
+
+   conf1 = await bot.send_message(message.chat.id, 'в конфигурации:')
+
+   conf2 = await bot.send_message(
+            message.chat.id,
+            md.text(
+               md.text('API токен бота: ', md.code(API_TOKEN)),
+               md.text('Имя хостера: ', hoster),
+               md.text('Часовой пояс: ', utc),
+               md.text('Максимальное количество стикеров: ', maxstickerblock),
+               md.text('Максимальное количество гифок: ', maxgifblock),
+               sep='\n',
+            ),
+            parse_mode=ParseMode.MARKDOWN,
+      )
+
+   time_set = time.time()
+   local_time = time.ctime(time_set)
+   log = open('log.txt', 'a')
+   user_sticker = message.from_user.first_name
+   log.write(f'\n {local_time}: Пользователь {user_sticker} Посмотрел конфигурацию бота')
+   log.close()
+   print(f'\n {local_time}: Пользователь {user_sticker} Посмотрел конфигурацию бота')
+   await message.delete()
+   time.sleep(4)
+   await conf1.delete()
+   await conf2.delete()
+
+
+
 
 @dp.message_handler(commands=['cont_mod'], content_types=['any'])
 async def startup_message(message: types.Message):
@@ -205,10 +423,9 @@ async def startup_message(message: types.Message):
       time.sleep(5)
       await clear_log_info.delete()
 
-
 @dp.message_handler(commands=['start']) #Явно указываем в декораторе, на какую команду реагируем. 
 async def send_welcome(message: types.Message):
-   info_start_msg = await message.reply("Я Малик Альф-Саиф и если не будешь следовать правилам, то я наведу такую трёпку\nВ частности, если вы будете спаммить стикерами, то каждого буду банить в зависимости, сколько решат поставить времени.\n WebMast уже реализовал это, приятного общения!!!. >:)  ")
+   info_start_msg = await message.reply("Я Малик Альф-Саиф и если не будешь следовать правилам, то я наведу такую трёпку\nВ частности, если вы будете спаммить стикерами, то каждого буду банить в зависимости, сколько решат поставить времени.\n WebMast уже реализовал это, приятного общения!!!. >:) Правила таковы, слушайте админов и спамьте стикерами и гифками ")
 
    time_set = time.time()
    local_time = time.ctime(time_set)
@@ -270,6 +487,8 @@ async def setup_default_commands(dp):
         BotCommand(command="clear_log", description="Очистка логов"),
         BotCommand(command="sticker", description="Проверка доступных к отправке стикеров"),
         BotCommand(command="gif", description="Проверка доступных к отправке гифок"),
+        BotCommand(command="setup", description="Настроить Малика делать то, от чего вам нужно"),
+        BotCommand(command="view_config", description="Посмотреть конфигурацию у конфигуратора"),
     ])
     asyncio.create_task(scheduler())
       
@@ -277,6 +496,7 @@ async def setup_default_commands(dp):
 @dp.message_handler(content_types=['any']) #Создаём новое событие, которое запускается в ответ на любой текст, введённый пользователем.
 async def echo(message: types.Message): #Создаём функцию с простой задачей — отправить обратно тот же текст, что ввёл пользователь.
    global stickerblock, maxstickerblock, blockedstickerblock,gifblock, maxgifblock, blockedgifblock, user_track_spam, new_message_time, old_message_time, spam_sticker_seconds
+   global user_track_spam_gif, old_message_time_gif, new_message_time_gif, spam_gif_seconds
    if message.sticker:
       if message.chat.type == 'private':
          await message.answer('Не думай, что ты можешь меня обхитрить, ибо я только в группах навожу порядок. Спамь сколько хочешь тут!')
@@ -292,7 +512,7 @@ async def echo(message: types.Message): #Создаём функцию с про
 
          timemsg = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, datetime.now().microsecond)
 
-         if user_track_spam == '':
+         if user_track_spam_gif == '':
             user_track_spam = message.from_user.first_name
             print(user_track_spam)
             new_message_time == timemsg.microsecond
@@ -306,16 +526,16 @@ async def echo(message: types.Message): #Создаём функцию с про
                   old_message_time = new_message_time
                   new_message_time = timemsg.microsecond
                   print(f'Принято стикерко за {new_message_time}')
-                  if new_message_time < 400000 and old_message_time < 400000 :
+                  if old_message_time < 400000 and new_message_time < 400000:
                      spam_sticker_seconds += 1
-                     print(f'Быстрый стикер: {spam_sticker_seconds} из 3')
+                     print(f'Быстрый стикер: {spam_sticker_seconds} из 1')
                   else:
                      new_message_time == timemsg.microsecond
                      old_message_time = ''
                      spam_sticker_seconds = 0
                      print("Медленный стикер")
 
-                  if spam_sticker_seconds == 3:
+                  if spam_sticker_seconds == 1:
                      #antispam_message_sticker = await message.answer_sticker(stop_spam_sticker)
                      antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении 15 минут')
                      ban_time= (int(time.time()) + 900*utc+900)
@@ -325,7 +545,7 @@ async def echo(message: types.Message): #Создаём функцию с про
                      
                      print(ban_time)
                      
-                     asyncio.sleep(1)
+                     time.sleep(1)
                      #antispam_message_sticker.delete()
                      await antispam_message_text.delete()
             else:
@@ -357,6 +577,51 @@ async def echo(message: types.Message): #Создаём функцию с про
             gifblock +=1
             status = 'НЕОтказано'
 
+         time_gif_msg = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second, datetime.now().microsecond)
+
+         if user_track_spam_gif == '':
+            user_track_spam_gif = message.from_user.first_name
+            print(user_track_spam_gif)
+            new_message_time_gif == time_gif_msg.microsecond
+            old_message_time_gif = ''
+         else:
+            if user_track_spam_gif == message.from_user.first_name:
+               if new_message_time_gif == '':
+                  new_message_time_gif == time_gif_msg.microsecond
+                  print(f'Принято гиферко за {new_message_time}')
+               else:
+                  old_message_time_gif = new_message_time_gif
+                  new_message_time_gif = time_gif_msg.microsecond
+                  print(f'Принято гиферко за {new_message_time}')
+                  if old_message_time_gif < 1500000 and new_message_time_gif < 1500000:
+                     spam_gif_seconds += 1
+                     print(f'Быстрый гифе: {spam_sticker_seconds} из 1')
+                  else:
+                     new_message_time == time_gif_msg.microsecond
+                     old_message_time = ''
+                     spam_sticker_seconds = 0
+                     print("Медленный гиф")
+
+                  if spam_gif_seconds == 1:
+                     #antispam_message_sticker = await message.answer_sticker(stop_spam_sticker)
+                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении 15 минут')
+                     ban_time= (int(time.time()) + 900*utc+900)
+                     print(ban_time)
+
+                     await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_messages=False)
+                     
+                     print(ban_time)
+                     
+                     time.sleep(1)
+                     #antispam_message_sticker.delete()
+                     await antispam_message_text.delete()
+            else:
+               user_track_spam_gif = message.from_user.first_name
+               print(user_track_spam_gif)
+               print(2)
+               new_message_time_gif == time_gif_msg.microsecond
+               old_message_time_gif = ''
+
          time_set = time.time()
          local_time = time.ctime(time_set)
          log = open('log.txt', 'a')
@@ -375,12 +640,15 @@ async def echo(message: types.Message): #Создаём функцию с про
          log.write(f'\n {local_time}: Пользователь {user_sticker} Предложил мне.')
          log.close()
          print(f'\n {local_time}: Пользователь {user_sticker} Предложил мне.')
-         asyncio.sleep(1)
-         cont_msg.delete()
+         asyncio.sleep(2)
+         await cont_msg.delete()
       else:
          pass
 
 if __name__ == '__main__':
    
-   print('Запуск Malik Alf-Salif 0.04')
-   executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
+   print('Запуск Malik Alf-Salif 0.05')
+   try:
+      executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
+   except:
+      API_TOKEN = input('Укажите API токен еще раз. После второго раза, скрипт закроется \n API TOKEN> ')
