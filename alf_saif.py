@@ -11,7 +11,6 @@ import asyncio
 import aioschedule
 from datetime import datetime
 import os
-import random
 
 if os.path.isfile('session.py'):
    try:
@@ -43,7 +42,6 @@ try:
    user_track_spam = ''
    new_message_time = 0.0
    old_message_time = 0.0
-   stop_spam_sticker = 'CAACAgQAAxkBAAEB67RlT7UCv46lCb1QULxPKEZp6FxKDgAC2AwAApzYQFLmTLCt5d5_tDME'
    spam_sticker_seconds = 0
 
    admin1=ses.admin1
@@ -72,7 +70,6 @@ except:
    user_track_spam = ''
    new_message_time = 0.0
    old_message_time = 0.0
-   stop_spam_sticker = 'CAACAgQAAxkBAAEB67RlT7UCv46lCb1QULxPKEZp6FxKDgAC2AwAApzYQFLmTLCt5d5_tDME'
    spam_sticker_seconds = 0
 
    admin1=int(input('Укажите ID первого для начального администрирования> '))
@@ -87,7 +84,7 @@ except:
 
 @dp.message_handler(commands=['about'], content_types=['any'])
 async def startup_message(message: types.Message):
-   info_msg = await message.answer(f'Малик Альф Саиф. Версия 0.06. Made by WebMast from WebAnLiMaks studio, hosted by {hoster}.')
+   info_msg = await message.answer(f'Малик Альф Саиф. Версия 0.07. Made by WebMast from WebAnLiMaks studio, hosted by {hoster}.')
    video_msg = await message.answer_photo(r'https://github.com/evembar/malik_bot/raw/main/startup.webp')
    time_set = time.time()
    local_time = time.ctime(time_set)
@@ -133,12 +130,77 @@ async def startup_message(message: types.Message):
    print(f'\n {local_time} : Доступных гифок осталось:  {maxgifblock - gifblock}. Заблокированных : {blockedgifblock}')
    time.sleep(2)
    await static.delete()
+
+@dp.message_handler(commands=['mut'], content_types=['any'])
+async def startup_message(message: types.Message):
+
+   if message.from_user.id == admin1 or message.from_user.id == admin2 or message.from_user.id == admin3:
+      
+      muted_user = message.text
+
+      muted_user = muted_user.split()[1:]
+
+      await bot.restrict_chat_member(chat_id=message.chat.id, user_id=muted_user[0],can_send_messages=False)
+      await message.answer(f'Пользователь {muted_user[0]} был замутен {message.from_user.first_name}')
+         
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} замутил пользователя')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} замутил пользователя')
+   else:
+
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} Попытался замутить пользователя')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} Попытался замутить пользователя')
+
+      clear_log_info = await message.answer('Доступ ограничен. Попросите об этом админов')
+      await message.delete()
+      time.sleep(5)
+      await clear_log_info.delete()
+
+@dp.message_handler(commands=['unmut'], content_types=['any'])
+async def startup_message(message: types.Message):
+
+   if message.from_user.id == admin1 or message.from_user.id == admin2 or message.from_user.id == admin3:
+      
+      muted_user = message.text
+
+      muted_user = muted_user.split()[1:]
+
+      await bot.restrict_chat_member(chat_id=message.chat.id, user_id=muted_user[0],can_send_messages=True)
+      await message.answer(f'Пользователь {muted_user[0]} был размутен {message.from_user.first_name}')
+         
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} размутил пользователя')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} размутил пользователя')
+   else:
+
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} Попытался размутить пользователя')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} Попытался размутить пользователя')
+
+      clear_log_info = await message.answer('Доступ ограничен. Попросите об этом админов')
+      await message.delete()
+      time.sleep(5)
+      await clear_log_info.delete()
    
 @dp.message_handler(commands=['clear_log'], content_types=['any'])
 async def startup_message(message: types.Message):
-   #webmast_id = 1702139456 
-   #nikita44_id=2023745296
-   #ivanban_id=5507903625
 
    if message.from_user.id == admin1 or message.from_user.id == admin2 or message.from_user.id == admin3:
       import os
@@ -197,7 +259,7 @@ async def startup_message(message: types.Message):
       log.close()
       print(f'\n {local_time}: Пользователь {user_sticker} Обнулил лимиты')
 
-      clear_log_info = await message.answer('Обнуление лимита доступных к отправке медиа')
+      clear_log_info = await message.answer('Обнуление лимита доступных к отправке стикеров и гифок')
       await message.delete()
       time.sleep(2)
       await clear_log_info.delete()
@@ -370,8 +432,6 @@ async def process_name(message: types.Message, state: FSMContext):
     global hoster, utc, maxstickerblock, maxgifblock, stickerblock, gifblock
     async with state.proxy() as ses_config:
       ses_config['id_admin3'] = message.text
-      markup = types.ReplyKeyboardRemove()
-
 
       await bot.send_message(message.chat.id, 'в конфигурации будет:')
 
@@ -434,9 +494,9 @@ async def process_name(message: types.Message, state: FSMContext):
 
     stickerblock=0
     gifblock=0
-    maxstickerblock=ses_config['max_sticker']
-    maxgifblock=ses_config['max_gif']
-    utc=ses_config['utc_number']
+    maxstickerblock=int(ses_config['max_sticker'])
+    maxgifblock=int(ses_config['max_gif'])
+    utc=int(ses_config['utc_number'])
     hoster=ses_config['hoster_name']
 
 @dp.message_handler(commands=['view_config']) #Явно указываем в декораторе, на какую команду реагируем. 
@@ -471,8 +531,6 @@ async def send_welcome(message: types.Message):
    time.sleep(4)
    await conf1.delete()
    await conf2.delete()
-
-
 
 
 @dp.message_handler(commands=['cont_mod'], content_types=['any'])
@@ -564,8 +622,6 @@ async def scheduler():
 
          await asyncio.sleep(1)
         
-
-
 async def setup_default_commands(dp):
     
 
@@ -580,6 +636,8 @@ async def setup_default_commands(dp):
         BotCommand(command="setup", description="Настроить Малика делать то, от чего вам нужно"),
         BotCommand(command="view_config", description="Посмотреть конфигурацию у конфигуратора"),
         BotCommand(command="view_log", description="Посмотреть все логи"),
+        BotCommand(command="mut", description="Замутить пользователя. Команда работает так: /mut [ID пользователя]"),
+        BotCommand(command="unmut", description="Размутить пользователя. Команда работает так: /unmut [ID пользователя]"),
     ])
     asyncio.create_task(scheduler())
       
@@ -617,7 +675,7 @@ async def echo(message: types.Message): #Создаём функцию с про
                   old_message_time = new_message_time
                   new_message_time = timemsg.microsecond
                   print(f'Принято стикерко за {new_message_time}')
-                  if old_message_time < 400000 and new_message_time < 400000:
+                  if old_message_time < 450000 and new_message_time < 450000:
                      spam_sticker_seconds += 1
                      print(f'Быстрый стикер: {spam_sticker_seconds} из 1')
                   else:
@@ -627,21 +685,19 @@ async def echo(message: types.Message): #Создаём функцию с про
                      print("Медленный стикер")
 
                   if spam_sticker_seconds == 1:
-                     #antispam_message_sticker = await message.answer_sticker(stop_spam_sticker)\
 
-                     random_ban_time = int(random.randint(900,3600))
+                     ban_cel = 1800
 
-                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении {int(random_ban_time/60)} минут')
-                     ban_time= (int(time.time()) + random_ban_time*random_ban_time+900)
+                     ban_time= (int(time.time()) + ban_cel*utc/utc)
                      print(ban_time)
 
-                     await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_messages=False)
-                     
+                     try:
+                        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_messages=False)
+                        await message.answer(f'Критичная стикер спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении {int(ban_cel/60)} минут. Окончание блокировки: {time.ctime(ban_time)}')
+                     except:
+                        await message.answer(f'Да-да, {user_track_spam}, да.')
+
                      print(ban_time)
-                     
-                     time.sleep(1)
-                     #antispam_message_sticker.delete()
-                     await antispam_message_text.delete()
             else:
                user_track_spam = message.from_user.first_name
                print(user_track_spam)
@@ -697,21 +753,19 @@ async def echo(message: types.Message): #Создаём функцию с про
                      print("Медленный гиф")
 
                   if spam_gif_seconds == 1:
-                     #antispam_message_sticker = await message.answer_sticker(stop_spam_sticker)
 
-                     random_ban_time = int(random.randint(900,3600))
+                     ban_cel = 1800
 
-                     antispam_message_text = await message.answer(f'Критичная спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении {random_ban_time/60} минут')
-                     ban_time= (int(time.time()) + random_ban_time*utc+random_ban_time)
+                     ban_time= (int(time.time()) + ban_cel*utc/utc)
                      print(ban_time)
 
-                     await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_messages=False)
-                     
+                     try:
+                        await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_messages=False)
+                        await message.answer(f'Критичная gif спам атака, происходит блокировка спаммера {user_track_spam}. Блокировка будет длиться в течении {int(ban_cel/60)} минут. Окончание блокировки: {time.ctime(ban_time)}')
+                     except:
+                        await message.answer(f'Да-да, {user_track_spam}, да.')
+
                      print(ban_time)
-                     
-                     time.sleep(1)
-                     #antispam_message_sticker.delete()
-                     await antispam_message_text.delete()
             else:
                user_track_spam_gif = message.from_user.first_name
                print(user_track_spam_gif)
@@ -737,14 +791,19 @@ async def echo(message: types.Message): #Создаём функцию с про
          log.write(f'\n {local_time}: Пользователь {user_sticker} Предложил мне.')
          log.close()
          print(f'\n {local_time}: Пользователь {user_sticker} Предложил мне.')
-         asyncio.sleep(2)
+         await asyncio.sleep(2)
          await cont_msg.delete()
       else:
-         pass
+         msg = message.text
+
+         if message.text == 'Продолжай.' or message.text == 'продолжай.':
+            no_cont_msg = await message.reply('Не буду продолжать.')
+            await asyncio.sleep(5)
+            await no_cont_msg.delete()
 
 if __name__ == '__main__':
    
-   print('Запуск Malik Alf-Salif 0.06')
+   print('Запуск Malik Alf-Salif 0.07')
    try:
       executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
    except:
