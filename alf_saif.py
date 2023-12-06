@@ -24,8 +24,9 @@ else:
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot=bot, storage=storage)
-version = '1.1.0'
+version = '1.1.2'
 black_user_list=[]
+timehour=0
 
 try:
    stickerblock = 0
@@ -299,6 +300,43 @@ async def startup_message(message: types.Message):
       await asyncio.sleep(5)
       await clear_log_info.delete()
 
+@dp.message_handler(commands=['admin_command'], content_types=['any'])
+async def startup_message(message: types.Message):
+
+   if message.from_user.id == admin1 or message.from_user.id == admin2 or message.from_user.id == admin3 :
+      if message.chat.type == 'private':
+         import os
+
+         await message.answer('Вот список комманд:\n /setup - Настроить Малика делать то, от чего вам нужно\n /mut - Замутить пользователя. Команда работает так: /mut [ID пользователя]\n /unmut - Размутить пользователя. Команда работает так: /unmut [ID пользователя]\n /clear_log - Очистка логов\n /obnull_limit_all - Обнуление лимита отправляемых гифок и стикеров')
+
+
+         time_set = time.time()
+         local_time = time.ctime(time_set)
+         log = open('log.txt', 'a')
+         user_sticker = message.from_user.first_name
+         log.write(f'\n {local_time}: Пользователь {user_sticker} просмотрел команды для админов')
+         log.close()
+         print(f'\n {local_time}: Пользователь {user_sticker} просмотрел команды для админов')
+      else:
+         clear_log_info = await message.answer('Не посмотришь на комманды для админов.')
+         await message.delete()
+         await asyncio.sleep(5)
+         await clear_log_info.delete()
+   else:
+
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} Хотел посмотреть комманды админов')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} Хотел посмотреть комманды админов')
+
+      clear_log_info = await message.answer('Не посмотришь на комманды для админов.')
+      await message.delete()
+      await asyncio.sleep(5)
+      await clear_log_info.delete()
+
 @dp.message_handler(commands=['obnull_limit_all'], content_types=['any'])
 async def startup_message(message: types.Message):
 
@@ -565,38 +603,67 @@ async def process_name(message: types.Message, state: FSMContext):
 @dp.message_handler(commands=['view_config']) #Явно указываем в декораторе, на какую команду реагируем. 
 async def send_welcome(message: types.Message):
 
-   conf1 = await bot.send_message(message.chat.id, 'в конфигурации:')
-   name_admin1 = await bot.get_chat_member(message.chat.id, admin1)
-   name_admin2 = await bot.get_chat_member(message.chat.id, admin2)
-   name_admin3 = await bot.get_chat_member(message.chat.id, admin3)
+   if message.chat.type == 'private':
 
-   conf2 = await bot.send_message(
-            message.chat.id,
-            md.text(
-               md.text('API токен бота: ', md.code(API_TOKEN)),
-               md.text('Имя хостера: ', hoster),
-               md.text('Часовой пояс: ', utc),
-               md.text('Максимальное количество стикеров: ', maxstickerblock),
-               md.text('Максимальное количество гифок: ', maxgifblock),
-               md.text('Первый администратор: ', name_admin1.user.first_name),
-               md.text('Второй администратор: ', name_admin2.user.first_name),
-               md.text('Третий администратор: ', name_admin3.user.first_name),
-               sep='\n',
-            ),
-            parse_mode=ParseMode.MARKDOWN,
-      )
+      conf1 = await bot.send_message(message.chat.id, 'в конфигурации:')
 
-   time_set = time.time()
-   local_time = time.ctime(time_set)
-   log = open('log.txt', 'a')
-   user_sticker = message.from_user.first_name
-   log.write(f'\n {local_time}: Пользователь {user_sticker} Посмотрел конфигурацию бота')
-   log.close()
-   print(f'\n {local_time}: Пользователь {user_sticker} Посмотрел конфигурацию бота')
-   await message.delete()
-   await asyncio.sleep(4)
-   await conf1.delete()
-   await conf2.delete()
+      conf2 = await bot.send_message(
+               message.chat.id,
+               md.text(
+                  md.text('API токен бота: ', md.code(API_TOKEN)),
+                  md.text('Имя хостера: ', hoster),
+                  md.text('Часовой пояс: ', utc),
+                  md.text('Максимальное количество стикеров: ', maxstickerblock),
+                  md.text('Максимальное количество гифок: ', maxgifblock),
+                  md.text('Первый администратор: ', admin1),
+                  md.text('Второй администратор: ', admin2),
+                  md.text('Третий администратор: ', admin3),
+                  sep='\n',
+               ),
+               parse_mode=ParseMode.MARKDOWN,
+         )
+
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} Посмотрел конфигурацию бота')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} Посмотрел конфигурацию бота')
+   else:
+
+      conf1 = await bot.send_message(message.chat.id, 'в конфигурации:')
+      name_admin1 = await bot.get_chat_member(message.chat.id, admin1)
+      name_admin2 = await bot.get_chat_member(message.chat.id, admin2)
+      name_admin3 = await bot.get_chat_member(message.chat.id, admin3)
+
+      conf2 = await bot.send_message(
+               message.chat.id,
+               md.text(
+                  md.text('API токен бота: ', md.code(API_TOKEN)),
+                  md.text('Имя хостера: ', hoster),
+                  md.text('Часовой пояс: ', utc),
+                  md.text('Максимальное количество стикеров: ', maxstickerblock),
+                  md.text('Максимальное количество гифок: ', maxgifblock),
+                  md.text('Первый администратор: ', name_admin1.user.first_name),
+                  md.text('Второй администратор: ', name_admin2.user.first_name),
+                  md.text('Третий администратор: ', name_admin3.user.first_name),
+                  sep='\n',
+               ),
+               parse_mode=ParseMode.MARKDOWN,
+         )
+
+      time_set = time.time()
+      local_time = time.ctime(time_set)
+      log = open('log.txt', 'a')
+      user_sticker = message.from_user.first_name
+      log.write(f'\n {local_time}: Пользователь {user_sticker} Посмотрел конфигурацию бота')
+      log.close()
+      print(f'\n {local_time}: Пользователь {user_sticker} Посмотрел конфигурацию бота')
+      await message.delete()
+      await asyncio.sleep(4)
+      await conf1.delete()
+      await conf2.delete()
 
 
 @dp.message_handler(commands=['cont_mod'], content_types=['any'])
@@ -666,43 +733,29 @@ async def obnull_limit_rasp():
    print(f'\n {local_time}: Обнуление лимита стикеров,гифок')
 
 async def scheduler():
-    while True:
+   global timehour
+   while True:
+
          await aioschedule.run_pending()
-
-         timezone = datetime(datetime.now().year, datetime.now().month, datetime.now().day, datetime.now().hour, datetime.now().minute, datetime.now().second)
-
-         if (timezone.hour == 0 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 1 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 2 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 3 and timezone.minute == 0 and timezone.second == 0):
-           await obnull_limit_rasp()
-         elif (timezone.hour == 4 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 5 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 6 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 7 and timezone.minute == 0 and timezone.second == 0):
-           await obnull_limit_rasp()
-         elif (timezone.hour == 8 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 9 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 10 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 11 and timezone.minute == 0 and timezone.second == 0):
-           await obnull_limit_rasp()
-         elif (timezone.hour == 12 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 13 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 14 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 15 and timezone.minute == 0 and timezone.second == 0):
-           await obnull_limit_rasp()
-         elif (timezone.hour == 16 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 17 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 18 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 19 and timezone.minute == 0 and timezone.second == 0):
-           await obnull_limit_rasp()
-         elif (timezone.hour == 20 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 21 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 22 and timezone.minute == 0 and timezone.second == 0) or (timezone.hour == 23 and timezone.minute == 0 and timezone.second == 0):
-           await obnull_limit_rasp()
-         else:
-            pass
-
          await asyncio.sleep(1)
+
+         timehour +=1
+         if timehour == 3600:
+            await obnull_limit_rasp()
+            timehour = 0
+
         
 async def setup_default_commands(dp):
    await dp.bot.set_my_commands([
-      BotCommand(command="about", description="О Малике"),
-      BotCommand(command="cont_mod", description="Включение функции продолжайкина"),
       BotCommand(command="start", description="Приветствие от Малика"),
-      BotCommand(command="obnull_limit_all", description="Обнуление лимита отправляемых гифок и стикеров"),
-      BotCommand(command="clear_log", description="Очистка логов"),
+      BotCommand(command="about", description="О Малике"),
       BotCommand(command="sticker", description="Проверка доступных к отправке стикеров"),
       BotCommand(command="gif", description="Проверка доступных к отправке гифок"),
-      BotCommand(command="setup", description="Настроить Малика делать то, от чего вам нужно"),
-      BotCommand(command="view_config", description="Посмотреть конфигурацию у конфигуратора"),
-      BotCommand(command="view_log", description="Посмотреть все логи"),
-      BotCommand(command="mut", description="Замутить пользователя. Команда работает так: /mut [ID пользователя]"),
-      BotCommand(command="unmut", description="Размутить пользователя. Команда работает так: /unmut [ID пользователя]"),
       BotCommand(command="muted_ever_user", description="Список полностью замученных пользователей"),
+      BotCommand(command="view_log", description="Посмотреть все логи"),
+      BotCommand(command="admin_command", description="Команды для администрирования"),
+      BotCommand(command="cont_mod", description="Включение функции продолжайкина"),
+      BotCommand(command="view_config", description="Посмотреть конфигурацию у конфигуратора"),
     ])
    asyncio.create_task(scheduler())
       
@@ -876,12 +929,77 @@ async def echo(message: types.Message):
             no_cont_msg = await message.reply('Не буду продолжать.')
             await asyncio.sleep(5)
             await no_cont_msg.delete()
-      
 
 if __name__ == '__main__':
    print(f'Malik Alf-Saif {version}')
    try:
       executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
    except:
-      API_TOKEN = input('Укажите API токен еще раз. После второго раза, скрипт закроется \n API TOKEN> ')
-      executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
+      wifi_detect = input('Бот не запустился. Проверьте, у вас рабочая сеть и без ограничений. Если все впорядке, то пишите Y или y\nЕсли у вас какие-то проблемы, то пока не пишите до тех пор, пока не устраните проблемы) > ')
+      if wifi_detect == 'Y' or wifi_detect == 'y':
+         repeat_setup = input('Попробовать запустить сценарий еще раз?(Y,y(Да),N,n(Нет)) > ')
+         if repeat_setup == 'Y' or repeat_setup == 'y':
+            try:
+               executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
+            except:
+               print('Попытка запустить бота с сценарием не удалась, но вы можете попытаться запустить его, введя вручную API бота')
+               API_TOKEN = input('Укажите API токен \n API TOKEN> ')
+               stickerblock = 0
+               maxstickerblock = 25
+               blockedstickerblock = 0
+               continuer = 0
+
+               utc = 4
+
+               hoster = 'noname-hoster'
+
+               gifblock = 0
+               maxgifblock = 25
+               blockedgifblock = 0
+
+               user_track_spam = ''
+               new_message_time = 0.0
+               old_message_time = 0.0
+               spam_sticker_seconds = 0
+
+               admin1=int(input('Укажите ID первого админа для начального администрирования> '))
+               admin2=int(input('Укажите ID второго админа для начального администрирования> '))
+               admin3=int(input('Укажите ID третьего админа для начального администрирования> '))
+
+               user_track_spam_gif = ''
+               new_message_time_gif = 0.0
+               old_message_time_gif = 0.0
+               spam_gif_seconds = 0
+               executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
+         elif repeat_setup == 'N' or repeat_setup == 'n':
+            API_TOKEN = input('Укажите API токен \n API TOKEN> ')
+            stickerblock = 0
+            maxstickerblock = 25
+            blockedstickerblock = 0
+            continuer = 0
+
+            utc = 4
+
+            hoster = 'noname-hoster'
+
+            gifblock = 0
+            maxgifblock = 25
+            blockedgifblock = 0
+
+            user_track_spam = ''
+            new_message_time = 0.0
+            old_message_time = 0.0
+            spam_sticker_seconds = 0
+
+            admin1=int(input('Укажите ID первого админа для начального администрирования> '))
+            admin2=int(input('Укажите ID второго админа для начального администрирования> '))
+            admin3=int(input('Укажите ID третьего админа для начального администрирования> '))
+
+            user_track_spam_gif = ''
+            new_message_time_gif = 0.0
+            old_message_time_gif = 0.0
+            spam_gif_seconds = 0
+            executor.start_polling(dp, skip_updates=True, on_startup=setup_default_commands)
+      else:
+         print('Вас не просили что-то постороннее писать, поэтому скрипт отключится')
+         quit()
