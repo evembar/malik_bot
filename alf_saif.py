@@ -756,13 +756,6 @@ async def echo(message: types.Message):
                         await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_media_messages=False)
                         await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_other_messages=False)
                         await message.answer(f'Пользователь {user_track_spam} быстро отправлял стикеры. Блокировка будет длиться в течении {int(ban_cel/60)} минут. Окончание блокировки: {time.ctime(ban_time)}')
-                        
-                        time_set = time.time()
-                        local_time = time.ctime(time_set)
-                        log = open('log.txt', 'a')
-                        user_sticker = message.from_user.first_name
-                        log.write(f'\n {local_time}: Пользователь {user_sticker} был автоматически заблокирован ботом из-за быстрой отправки стикеров. Окончание блокировки: {time.ctime(ban_time)} ')
-                        log.close()
 
             else:
                user_track_spam = message.from_user.first_name
@@ -836,13 +829,6 @@ async def echo(message: types.Message):
                         await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_media_messages=False)
                         await bot.restrict_chat_member(chat_id=message.chat.id, user_id=message.from_user.id,until_date=ban_time, can_send_other_messages=False)
                         await message.answer(f'Пользователь {user_track_spam} очень быстро отправлял гифки. Блокировка будет длиться в течении {int(ban_cel/60)} минут. Окончание блокировки: {time.ctime(ban_time)}')
-
-                        time_set = time.time()
-                        local_time = time.ctime(time_set)
-                        log = open('log.txt', 'a')
-                        user_sticker = message.from_user.first_name
-                        log.write(f'\n {local_time}: Пользователь {user_sticker} был автоматически заблокирован ботом из-за быстрой отправки гифок. Окончание блокировки: {time.ctime(ban_time)} ')
-                        log.close()
             else:
                user_track_spam_gif = message.from_user.first_name
                print(user_track_spam_gif)
