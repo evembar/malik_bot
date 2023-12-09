@@ -24,7 +24,7 @@ else:
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot=bot, storage=storage)
-version = '1.2.0'
+version = '1.2.1'
 black_user_list=[]
 timehour=0
 
@@ -99,7 +99,7 @@ async def startup_message(message: types.Message):
 @dp.message_handler(commands=['sticker'], content_types=['any'])
 async def startup_message(message: types.Message):
    global stickerblock, maxstickerblock, blockedstickerblock
-   static = await message.answer(f'Доступных стикеров осталось:  {maxstickerblock - stickerblock}. Заблокированных : {blockedstickerblock}')
+   static = await message.answer(f'Доступных стикеров осталось: {maxstickerblock - stickerblock}. Заблокированных : {blockedstickerblock}')
    time_set = time.time()
    local_time = time.ctime(time_set)
    log = open('log.txt', 'a')
@@ -107,7 +107,7 @@ async def startup_message(message: types.Message):
    await message.delete()
    log.write(f'\n {local_time} : {user_sticker} вызвал статистику. Доступных стикеров осталось:  {maxstickerblock - stickerblock}. Заблокированных : {blockedstickerblock}')
    log.close()
-   print(f'\n {local_time} : Доступных стикеров осталось:  {maxstickerblock - stickerblock}. Заблокированных : {blockedstickerblock}')
+   print(f'\n {local_time} : Доступных стикеров осталось: {maxstickerblock - stickerblock}. Заблокированных : {blockedstickerblock}')
    await asyncio.sleep(2)
    await static.delete()
 
@@ -716,22 +716,23 @@ async def echo(message: types.Message):
          if user_track_spam == '':
             user_track_spam = message.from_user.first_name
             print(user_track_spam)
-            new_message_time == timemsg.microsecond
+            new_message_time = timemsg.microsecond
             old_message_time = ''
          else:
             if user_track_spam == message.from_user.first_name:
                if new_message_time == '':
-                  new_message_time == timemsg.microsecond
-                  print(f'Принят стике за {new_message_time}')
+                  new_message_time = timemsg.microsecond
+                  old_message_time = ''
+                  print(f'Принят стикер за {new_message_time}')
                else:
                   old_message_time = new_message_time
                   new_message_time = timemsg.microsecond
                   print(f'Принят стикер за {new_message_time}')
-                  if old_message_time < 350000 and new_message_time < 350000:
+                  if old_message_time < 35000 and new_message_time < 35000:
                      spam_sticker_seconds += 1
                      print(f'Быстрый стикер: {spam_sticker_seconds} из 1')
                   else:
-                     new_message_time == timemsg.microsecond
+                     new_message_time = timemsg.microsecond
                      old_message_time = ''
                      spam_sticker_seconds = 0
                      print("Медленный стикер")
@@ -789,12 +790,13 @@ async def echo(message: types.Message):
          if user_track_spam_gif == '':
             user_track_spam_gif = message.from_user.first_name
             print(user_track_spam_gif)
-            new_message_time_gif == time_gif_msg.microsecond
+            new_message_time_gif = time_gif_msg.microsecond
             old_message_time_gif = ''
          else:
             if user_track_spam_gif == message.from_user.first_name:
                if new_message_time_gif == '':
-                  new_message_time_gif == time_gif_msg.microsecond
+                  old_message_time_gif = ''
+                  new_message_time_gif = time_gif_msg.microsecond
                   print(f'Принята гифка за {new_message_time}')
                else:
                   old_message_time_gif = new_message_time_gif
@@ -804,7 +806,7 @@ async def echo(message: types.Message):
                      spam_gif_seconds += 1
                      print(f'Быстрая отправленная гифка: {spam_sticker_seconds} из 1')
                   else:
-                     new_message_time == time_gif_msg.microsecond
+                     new_message_time = time_gif_msg.microsecond
                      old_message_time = ''
                      spam_sticker_seconds = 0
                      print("Медленная отправленная гифка")
@@ -833,7 +835,7 @@ async def echo(message: types.Message):
                user_track_spam_gif = message.from_user.first_name
                print(user_track_spam_gif)
                print(2)
-               new_message_time_gif == time_gif_msg.microsecond
+               new_message_time_gif = time_gif_msg.microsecond
                old_message_time_gif = ''
 
          time_set = time.time()
@@ -844,6 +846,10 @@ async def echo(message: types.Message):
          log.close()
          print(f'\n {local_time}: Пользователь {user_sticker} Отправил гифку. Статус - {status}')
    elif message.text:
+      old_message_time = ''
+      old_message_time_gif = ''
+      new_message_time = ''
+      new_message_time = ''
       time_set = time.time()
       local_time = time.ctime(time_set)
       log = open('log.txt', 'a')
